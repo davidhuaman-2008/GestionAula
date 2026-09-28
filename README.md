@@ -273,6 +273,7 @@ Now listening on: http://localhost:5128
 ```
 
 **Terminal 2** — Ejecutar Blazor:
+<img width="1097" height="867" alt="image" src="https://github.com/user-attachments/assets/54d1a99f-5676-45a4-b6dc-9347733285cf" />
 
 ```bash
 dotnet run --project src/GestionAula.Web
