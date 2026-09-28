@@ -1,0 +1,105 @@
+﻿@page "/libreta/{Id:int}"
+@inject ApiService Api
+
+<PageTitle>Libreta — Gestión Aula</PageTitle>
+
+@if (loading)
+{
+    <div class="alert alert-info">
+        <span class="spinner-border spinner-border-sm me-2"></span> Cargando libreta...
+    </div>
+}
+else if (libreta == null)
+{
+    <div class="alert alert-danger">❌ Alumno no encontrado</div>
+    <a href="/alumnos" class="btn btn-secondary">← Volver a Alumnos</a>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>📖 Libreta</h1>
+        <a href="/alumnos" class="btn btn-outline-secondary">← Volver</a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="mb-0">@libreta.Apellidos, @libreta.Nombres</h3>
+                    <p class="text-muted mb-0">DNI: @libreta.DNI</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-1"><strong>Grado:</strong> @libreta.Grado — Sección @libreta.Seccion</p>
+                    <p class="mb-1"><strong>Año Escolar:</strong> @libreta.AnioEscolar</p>
+                    <p class="mb-0">
+                        <strong>Promedio General:</strong>
+                        <span class="badge bg-@(libreta.PromedioGeneral >= 11 ? "success" : "danger") fs-6">
+                            @libreta.PromedioGeneral.ToString("F2")
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Materia</th>
+                <th>Profesor</th>
+                <th class="text-center">P1</th>
+                <th class="text-center">P2</th>
+                <th class="text-center">P3</th>
+                <th class="text-center">P4</th>
+                <th class="text-center">Promedio</th>
+                <th class="text-center">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var n in libreta.Notas.OrderBy(x => x.Materia))
+            {
+                <tr>
+                    <td><strong>@n.Materia</strong></td>
+                    <td><small>@n.Profesor</small></td>
+                    <td class="text-center">@n.Parcial1?.ToString("F2")</td>
+                    <td class="text-center">@n.Parcial2?.ToString("F2")</td>
+                    <td class="text-center">@n.Parcial3?.ToString("F2")</td>
+                    <td class="text-center">@n.Parcial4?.ToString("F2")</td>
+                    <td class="text-center">
+                        <span class="badge bg-@(n.Promedio >= 11 ? "success" : "danger")">
+                            @n.Promedio.ToString("F2")
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-@(n.Estado == "APROBADO" ? "success" : "danger")">
+                            @n.Estado
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private LibretaDto? libreta;
+    private bool loading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        try
+        {
+            libreta = await Api.GetLibretaAsync(Id);
+        }
+        catch
+        {
+            libreta = null;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

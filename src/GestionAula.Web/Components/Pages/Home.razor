@@ -1,0 +1,121 @@
+﻿@page "/"
+@inject ApiService Api
+
+<PageTitle>Inicio — Gestión Aula</PageTitle>
+
+<h1>📊 Dashboard</h1>
+
+@if (loading)
+{
+    <div class="alert alert-info">
+        <span class="spinner-border spinner-border-sm me-2"></span> Cargando datos...
+    </div>
+}
+else if (alumnos == null || !alumnos.Any())
+{
+    <div class="alert alert-warning">
+        ⚠️ No hay datos. ¿El API está corriendo en <code>http://localhost:5128</code>?
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body">
+                    <h6 class="card-title">👥 Total Alumnos</h6>
+                    <h2 class="mb-0">@alumnos.Count</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <h6 class="card-title">✅ Aprobados</h6>
+                    <h2 class="mb-0">@alumnos.Count(a => a.EstadoGeneral == "APROBADO")</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body">
+                    <h6 class="card-title">⚠️ En Riesgo</h6>
+                    <h2 class="mb-0">@alumnos.Count(a => a.EstadoGeneral == "EN RIESGO")</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger h-100">
+                <div class="card-body">
+                    <h6 class="card-title">❌ Desaprobados</h6>
+                    <h2 class="mb-0">@alumnos.Count(a => a.EstadoGeneral == "DESAPROBADO")</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <strong>📈 Promedio General del Aula</strong>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-4">@promedioAula.ToString("F2")</h1>
+                    <p class="text-muted mb-0">Sobre 20 puntos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <strong>🏫 Distribución por Estado</strong>
+                </div>
+                <div class="card-body">
+                    @foreach (var estado in new[] { "APROBADO", "EN RIESGO", "DESAPROBADO" })
+                    {
+                        var count = alumnos.Count(a => a.EstadoGeneral == estado);
+                        var porcentaje = alumnos.Any() ? (count * 100.0 / alumnos.Count) : 0;
+                        var color = estado == "APROBADO" ? "success"
+                                  : estado == "EN RIESGO" ? "warning" : "danger";
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><strong>@estado</strong></span>
+                                <span>@count alumnos (@porcentaje.ToString("F1")%)</span>
+                            </div>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-@color" style="width: @porcentaje.ToString("F1")%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AlumnoDto>? alumnos;
+    private bool loading = true;
+    private decimal promedioAula;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            alumnos = await Api.GetAlumnosAsync();
+            promedioAula = alumnos.Any()
+                ? Math.Round(alumnos.Average(a => a.PromedioGeneral), 2)
+                : 0;
+        }
+        catch
+        {
+            alumnos = new();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

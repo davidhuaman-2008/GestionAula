@@ -1,0 +1,23 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <span class="text-muted">📊 Sistema de Gestión de Aula — .NET 10 + Blazor + SQL Server</span>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    Ha ocurrido un error.
+    <a href="" class="reload">Recargar</a>
+    <span class="dismiss">🗙</span>
+</div>

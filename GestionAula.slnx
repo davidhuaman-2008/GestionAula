@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GestionAula.Api/GestionAula.Api.csproj" />
+    <Project Path="src/GestionAula.Data/GestionAula.Data.csproj" />
+    <Project Path="src/GestionAula.Shared/GestionAula.Shared.csproj" />
+    <Project Path="src/GestionAula.Web/GestionAula.Web.csproj" />
+  </Folder>
+</Solution>

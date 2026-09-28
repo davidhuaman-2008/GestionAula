@@ -1,0 +1,78 @@
+﻿@page "/materias"
+@inject ApiService Api
+
+<PageTitle>Materias — Gestión Aula</PageTitle>
+
+<h1>📚 Resumen por Materia</h1>
+
+@if (loading)
+{
+    <div class="alert alert-info">
+        <span class="spinner-border spinner-border-sm me-2"></span> Cargando materias...
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var m in materias)
+        {
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between">
+                        <strong>@m.Nombre</strong>
+                        <span class="badge bg-light text-dark">@m.PorcentajeAprobados% aprobados</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2"><strong>👨‍🏫 Profesor:</strong> @m.Profesor</p>
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <h5 class="text-primary mb-0">@m.TotalAlumnos</h5>
+                                <small>Total</small>
+                            </div>
+                            <div class="col-4">
+                                <h5 class="text-success mb-0">@m.Aprobados</h5>
+                                <small>Aprobados</small>
+                            </div>
+                            <div class="col-4">
+                                <h5 class="text-danger mb-0">@m.Desaprobados</h5>
+                                <small>Desaprobados</small>
+                            </div>
+                        </div>
+                        <div class="progress mb-2" style="height: 20px;">
+                            <div class="progress-bar bg-success" style="width: @m.PorcentajeAprobados%">
+                                @m.PorcentajeAprobados.ToString("F1")%
+                            </div>
+                        </div>
+                        <p class="text-center mb-0">
+                            <strong>Promedio:</strong>
+                            <span class="badge bg-@(m.PromedioMateria >= 11 ? "success" : "danger")">
+                                @m.PromedioMateria.ToString("F2")
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<MateriaResumenDto> materias = new();
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            materias = await Api.GetMateriasResumenAsync();
+        }
+        catch
+        {
+            materias = new();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

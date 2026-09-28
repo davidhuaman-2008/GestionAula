@@ -1,0 +1,89 @@
+﻿@page "/desaprobados"
+@inject ApiService Api
+
+<PageTitle>Desaprobados — Gestión Aula</PageTitle>
+
+<h1>⚠️ Cursos Desaprobados</h1>
+
+@if (loading)
+{
+    <div class="alert alert-info">
+        <span class="spinner-border spinner-border-sm me-2"></span> Cargando...
+    </div>
+}
+else if (!desaprobados.Any())
+{
+    <div class="alert alert-success">🎉 ¡No hay cursos desaprobados!</div>
+}
+else
+{
+    <div class="alert alert-warning">
+        Se encontraron <strong>@desaprobados.Count</strong> cursos desaprobados en <strong>@AlumnosUnicos</strong> alumnos.
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-5">
+            <input type="text" class="form-control" placeholder="🔍 Buscar alumno, materia o profesor..." 
+                   @bind="filtro" @bind:event="oninput" />
+        </div>
+    </div>
+
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Alumno</th>
+                <th>Grado</th>
+                <th>Sección</th>
+                <th>Materia</th>
+                <th>Profesor</th>
+                <th class="text-center">Promedio</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in DesaprobadosFiltrados)
+            {
+                <tr>
+                    <td><strong>@d.Alumno</strong></td>
+                    <td>@d.Grado</td>
+                    <td>@d.Seccion</td>
+                    <td>@d.Materia</td>
+                    <td><small>@d.Profesor</small></td>
+                    <td class="text-center">
+                        <span class="badge bg-danger">@d.Promedio.ToString("F2")</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<AlumnoDesaprobadoDto> desaprobados = new();
+    private bool loading = true;
+    private string filtro = "";
+
+    private List<AlumnoDesaprobadoDto> DesaprobadosFiltrados => desaprobados
+        .Where(d => string.IsNullOrWhiteSpace(filtro)
+            || d.Alumno.Contains(filtro, StringComparison.OrdinalIgnoreCase)
+            || d.Materia.Contains(filtro, StringComparison.OrdinalIgnoreCase)
+            || d.Profesor.Contains(filtro, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+
+    private int AlumnosUnicos => desaprobados.Select(d => d.AlumnoId).Distinct().Count();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            desaprobados = await Api.GetDesaprobadosAsync();
+        }
+        catch
+        {
+            desaprobados = new();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

@@ -1,0 +1,126 @@
+﻿@page "/alumnos"
+@inject ApiService Api
+
+<PageTitle>Alumnos — Gestión Aula</PageTitle>
+
+<h1>👥 Lista de Alumnos</h1>
+
+@if (loading)
+{
+    <div class="alert alert-info">
+        <span class="spinner-border spinner-border-sm me-2"></span> Cargando alumnos...
+    </div>
+}
+else
+{
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="🔍 Buscar por nombre o DNI..." 
+                   @bind="filtro" @bind:event="oninput" />
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" @bind="filtroEstado">
+                <option value="">Todos los estados</option>
+                <option value="APROBADO">✅ Aprobados</option>
+                <option value="EN RIESGO">⚠️ En Riesgo</option>
+                <option value="DESAPROBADO">❌ Desaprobados</option>
+            </select>
+        </div>
+        <div class="col-md-5 text-end">
+            <span class="badge bg-primary fs-6">Mostrando @AlumnosFiltrados.Count de @alumnos.Count</span>
+        </div>
+    </div>
+
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Alumno</th>
+                <th>DNI</th>
+                <th>Grado</th>
+                <th>Secc.</th>
+                <th class="text-center">Promedio</th>
+                <th class="text-center">Aprob.</th>
+                <th class="text-center">Desap.</th>
+                <th class="text-center">Estado</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in AlumnosFiltrados)
+            {
+                <tr>
+                    <td>@a.AlumnoId</td>
+                    <td><strong>@a.Apellidos</strong>, @a.Nombres</td>
+                    <td>@a.DNI</td>
+                    <td>@a.Grado</td>
+                    <td>@a.Seccion</td>
+                    <td class="text-center">
+                        <span class="badge bg-@GetColorPromedio(a.PromedioGeneral)">
+                            @a.PromedioGeneral.ToString("F2")
+                        </span>
+                    </td>
+                    <td class="text-center text-success">@a.MateriasAprobadas</td>
+                    <td class="text-center text-danger">@a.MateriasDesaprobadas</td>
+                    <td class="text-center">
+                        <span class="badge bg-@GetColorEstado(a.EstadoGeneral)">@a.EstadoGeneral</span>
+                    </td>
+                    <td class="text-center">
+                        <a class="btn btn-sm btn-outline-primary" href="libreta/@a.AlumnoId">
+                            📖 Libreta
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<AlumnoDto> alumnos = new();
+    private bool loading = true;
+    private string filtro = "";
+    private string filtroEstado = "";
+
+    private List<AlumnoDto> AlumnosFiltrados => alumnos
+        .Where(a =>
+            (string.IsNullOrWhiteSpace(filtro)
+                || a.Nombres.Contains(filtro, StringComparison.OrdinalIgnoreCase)
+                || a.Apellidos.Contains(filtro, StringComparison.OrdinalIgnoreCase)
+                || a.DNI.Contains(filtro))
+            && (string.IsNullOrWhiteSpace(filtroEstado) || a.EstadoGeneral == filtroEstado)
+        )
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            alumnos = await Api.GetAlumnosAsync();
+        }
+        catch
+        {
+            alumnos = new();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private static string GetColorEstado(string estado) => estado switch
+    {
+        "APROBADO" => "success",
+        "EN RIESGO" => "warning",
+        "DESAPROBADO" => "danger",
+        _ => "secondary"
+    };
+
+    private static string GetColorPromedio(decimal p) => p switch
+    {
+        >= 16 => "success",
+        >= 11 => "primary",
+        >= 8 => "warning",
+        _ => "danger"
+    };
+}
