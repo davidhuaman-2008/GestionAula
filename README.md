@@ -189,8 +189,12 @@ El sistema maneja **8 tablas** con relaciones bien definidas:
 
 ```
 <img width="645" height="771" alt="image" src="https://github.com/user-attachments/assets/e3e0393d-902f-458e-9ae2-ae7e3cfd6e5a" />
+<img width="805" height="756" alt="image" src="https://github.com/user-attachments/assets/cfd412f3-c33a-47f9-84b7-e99582900826" />
+
 
 ```
+<img width="805" height="756" alt="image" src="https://github.com/user-attachments/assets/a2e27229-aa9e-4084-ad7d-7f9c10868309" />
+
 
 **Reglas de negocio:**
 - Cada alumno pertenece a un grado y una sección (vía `Matriculas`)
